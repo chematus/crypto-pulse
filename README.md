@@ -65,7 +65,7 @@ crypto-pulse/
 
 3.  **Configure Environment Variables:**
     Open the `.env` file and fill in the required values:
-    * `COINGECKO_API_KEY`: Your CoinGecko API key.
+    * `API_KEY`: Your CoinGecko API key.
     * `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`: Credentials for the PostgreSQL database.
     * `REDIS_PASSWORD` (optional): Password for Redis.
     * Ports for different services (`FRONTEND_PORT`, `API_PORT`, `WEBSOCKET_PORT`) if you need to change defaults.
@@ -83,11 +83,10 @@ crypto-pulse/
 
 ## ⚙️ Environment Variables (.env)
 
-* `COINGECKO_API_KEY`: **Required** for the `data-fetcher` service.
+* `API_KEY`: **Required** for the `data-fetcher` service.
 * `TRACKED_COIN_IDS`: Comma-separated list of CoinGecko coin IDs (e.g., `bitcoin,ethereum`) for the `data-fetcher`.
 * `FETCH_INTERVAL_MS`: How often the `data-fetcher` polls CoinGecko (in milliseconds, e.g., `60000` for 1 minute). Be mindful of API rate limits.
 * `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`: Database credentials used by `api-service` and potentially `data-fetcher`.
-* `DATABASE_URL`: Full connection string for Postgres (often derived from the above, e.g., `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}`).
 * `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`: Connection details for Redis used by `api-service`.
 * `KAFKA_BROKER`: Kafka broker address(es) (e.g., `kafka:9092`).
 * `FRONTEND_PORT`, `API_PORT`, `WEBSOCKET_PORT`: External ports mapped for accessing services.

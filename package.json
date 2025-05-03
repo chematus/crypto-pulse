@@ -1,0 +1,31 @@
+{
+  "name": "crypto-pulse",
+  "version": "1.0.0",
+  "description": "Crypto Pulse is a real-time cryptocurrency price tracking application. It fetches data from the CoinGecko API, processes it through a Kafka pipeline, and delivers live updates to a React frontend via WebSockets.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chematus/crypto-pulse.git"
+  },
+  "keywords": [],
+  "author": "chematus",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/chematus/crypto-pulse/issues"
+  },
+  "homepage": "https://github.com/chematus/crypto-pulse#readme",
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "^3.5.3",
+    "typescript-eslint": "^8.31.1"
+  }
+}
