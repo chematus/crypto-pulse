@@ -35,6 +35,7 @@ The application uses a microservices architecture orchestrated by Docker Compose
 
 The project follows a monorepo structure, with each service residing in its own directory:
 
+```
 crypto-pulse/
 ├── data-fetcher/
 ├── api-service/
@@ -44,6 +45,7 @@ crypto-pulse/
 ├── .env.example
 ├── .gitignore
 └── README.md
+```
 
 ## 📋 Prerequisites
 
