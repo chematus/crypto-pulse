@@ -11,12 +11,10 @@ services:
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9094'
-      
       KAFKA_LISTENERS: 'LISTENER_INTERNAL://kafka:9092,LISTENER_EXTERNAL://0.0.0.0:${KAFKA_EXT_PORT:-9093},CONTROLLER://kafka:9094'
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://kafka:9092,LISTENER_EXTERNAL://localhost:${KAFKA_EXT_PORT:-9093}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'LISTENER_INTERNAL'
-      
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -24,6 +22,37 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: '${KAFKA_AUTO_CREATE_TOPICS_ENABLE:-true}'
     networks:
       - crypto-pulse-net
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  data-fetcher:
+    build:
+      context: .
+      dockerfile: ./data-fetcher/Dockerfile
+    container_name: data-fetcher
+    restart: on-failure
+    networks:
+      - crypto-pulse-net
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-crypto-updates}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY}
+      API_HOST: ${API_HOST:-https://api.coingecko.com}
+      API_PATH: ${API_PATH:-/api/v3}
+      TRACKED_COIN_IDS: ${TRACKED_COIN_IDS:-bitcoin,ethereum}
+      DEFAULT_CURRENCY: ${DEFAULT_CURRENCY:-usd}
+      FETCH_INTERVAL_MS: ${FETCH_INTERVAL_MS:-30000}
+      LOG_DIR: ${LOG_DIR:-logs}
+      LOG_DEFAULT_LEVEL: ${LOG_DEFAULT_LEVEL:-info}
+      LOG_LEVEL_DATA_FETCHER: ${LOG_LEVEL_DATA_FETCHER}
+    depends_on:
+      kafka:
+        condition: service_healthy
 
 networks:
   crypto-pulse-net:

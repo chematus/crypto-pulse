@@ -1,4 +1,5 @@
-import { env } from 'node:process'; // Import env from node:process
+import { env } from 'node:process';
+import globals from 'globals';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
@@ -15,6 +16,8 @@ export default tseslint.config(
         '.env',
         'eslint.config.js',
         '.prettierrc.js',
+        'data-fetcher/dist/',
+        'logs',
     ],
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -22,7 +25,7 @@ export default tseslint.config(
     },
     languageOptions: {
         globals: {
-            node: true,
+          ...globals.node,
         }
     }
   }
