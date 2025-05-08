@@ -1,4 +1,4 @@
-import { Kafka, logLevel, CompressionTypes, KafkaJSNonRetriableError } from "kafkajs";
+import { Kafka, logLevel, CompressionTypes, KafkaJSError } from "kafkajs";
 import { env } from 'node:process';
 import loggerUtil from '@root/logger.util.js';
 
@@ -7,11 +7,13 @@ const logger = loggerUtil('data-fetcher');
 const KAFKA_BROKER = env.KAFKA_BROKER || 'kafka:9092';
 const KAFKA_CLIENT_ID = 'data-fetcher';
 const KAFKA_TOPIC = env.KAFKA_TOPIC || 'crypto-updates';
+const KAFKA_SEND_RETRIES = parseInt(env.KAFKA_SEND_RETRIES || '3', 10);
+const KAFKA_SEND_RETRY_DELAY_MS = parseInt(env.KAFKA_SEND_RETRY_DELAY_MS || '1000', 10);
 
 const API_HOST = env.API_HOST || 'https://api.coingecko.com';
 const API_PATH = env.API_PATH || '/api/v3';
 const API_ENDPOINT = '/simple/price';
-const API_KEY = env.COINGECKO_API_KEY || '';
+const API_KEY = env.API_KEY || '';
 const API_AUTH_HEADER = 'x-cg-demo-api-key';
 
 const DEFAULT_CURRENCY = env.DEFAULT_CURRENCY || 'usd';
@@ -25,6 +27,8 @@ const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 logger.info(`--- Data Fetcher Configuration ---`);
 logger.info(`Kafka Broker: ${KAFKA_BROKER}`);
 logger.info(`Kafka Topic: ${KAFKA_TOPIC}`);
+logger.info(`Kafka Send Retries: ${KAFKA_SEND_RETRIES}`);
+logger.info(`Kafka Send Retry Delay: ${KAFKA_SEND_RETRY_DELAY_MS}ms`);
 logger.info(`API Host: ${API_HOST}${API_PATH}`);
 logger.info(`Tracked Coins: ${COIN_IDS}`);
 logger.info(`Fetch Interval: ${FETCH_INTERVAL_MS}ms`);
@@ -91,6 +95,8 @@ const createMessage = (key: string, value: number): Message => ({
   }),
 });
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const pushMessages = async (payload: object | null) => {
   if (!payload) {
     logger.warn('No payload received, skipping message push.');
@@ -114,18 +120,35 @@ const pushMessages = async (payload: object | null) => {
     return;
   }
 
-  try {
-    await producer.send({
-      topic: KAFKA_TOPIC,
-      compression: CompressionTypes.GZIP,
-      messages,
-    });
-    logger.info(`Sent ${messages.length} messages to topic ${KAFKA_TOPIC}. Keys: ${messages.map(m => m.key).join(', ')}`);
-  } catch (error) {
-    logger.error(`Error sending messages to Kafka:`, error);
+  let attempts = 0;
+  while (attempts < KAFKA_SEND_RETRIES) {
+    attempts++;
 
-    if (error instanceof KafkaJSNonRetriableError) {
-        logger.error('Non-retriable Kafka error. Check connection or configuration.');
+    try {
+      await producer.send({
+        topic: KAFKA_TOPIC,
+        compression: CompressionTypes.GZIP,
+        messages,
+      });
+      logger.info(`(Attempt ${attempts}) Sent ${messages.length} messages to topic ${KAFKA_TOPIC}. Keys: ${messages.map(m => m.key).join(', ')}`);
+      return;
+    } catch (error) {
+      logger.warn(`(Attempt ${attempts}) Error sending messages to Kafka:`, error);
+      const isRetriable = error instanceof KafkaJSError && error.retriable;
+      const isPartitionError = error instanceof KafkaJSError && error.message.includes('topic-partition');
+
+      if (isRetriable || isPartitionError) {
+        if (attempts < KAFKA_SEND_RETRIES) {
+          logger.warn(`Retrying send in ${KAFKA_SEND_RETRY_DELAY_MS}ms...`);
+          await delay(KAFKA_SEND_RETRY_DELAY_MS);
+        } else {
+          logger.error(`Failed to send messages after ${KAFKA_SEND_RETRIES} attempts.`);
+        }
+      } else {
+        logger.error('Non-retriable Kafka error encountered during send. Aborting send.');
+
+        return;
+      }
     }
   }
 };
@@ -144,7 +167,7 @@ const run = async () => {
       } else {
         logger.warn('Fetch returned null, skipping push.');
       }
-
+     
       scheduleFetch();
     }, FETCH_INTERVAL_MS);
   };
