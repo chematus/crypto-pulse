@@ -24,6 +24,8 @@ const isProd = env.NODE_ENV === 'production';
 const errorTypes = ['unhandledRejection', 'uncaughtException'];
 const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
+let fetchScheduleTimeoutId: NodeJS.Timeout | null = null;
+
 logger.info(`--- Data Fetcher Configuration ---`);
 logger.info(`Kafka Broker: ${KAFKA_BROKER}`);
 logger.info(`Kafka Topic: ${KAFKA_TOPIC}`);
@@ -131,6 +133,7 @@ const pushMessages = async (payload: object | null) => {
         messages,
       });
       logger.info(`(Attempt ${attempts}) Sent ${messages.length} messages to topic ${KAFKA_TOPIC}. Keys: ${messages.map(m => m.key).join(', ')}`);
+
       return;
     } catch (error) {
       logger.warn(`(Attempt ${attempts}) Error sending messages to Kafka:`, error);
@@ -159,7 +162,7 @@ const run = async () => {
   logger.info('Kafka producer connected.');
 
   const scheduleFetch = () => {
-    setTimeout(async () => {
+    fetchScheduleTimeoutId = setTimeout(async () => {
       const data = await fetchData();
 
       if (data) {
@@ -167,7 +170,7 @@ const run = async () => {
       } else {
         logger.warn('Fetch returned null, skipping push.');
       }
-     
+
       scheduleFetch();
     }, FETCH_INTERVAL_MS);
   };
@@ -178,6 +181,11 @@ const run = async () => {
 
 const shutdown = async (signal: string) => {
   logger.warn(`Received signal: ${signal}. Shutting down...`);
+
+  if (fetchScheduleTimeoutId) {
+    clearTimeout(fetchScheduleTimeoutId);
+    logger.info('Cleared scheduled data fetch.');
+  }
 
   try {
     logger.info('Disconnecting Kafka producer...');
