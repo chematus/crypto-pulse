@@ -11,6 +11,7 @@
   "keywords": [],
   "author": "chematus",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "kafkajs": "^2.2.4",
     "winston": "^3.17.0",

@@ -7,16 +7,17 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@root/*": ["../*"],
+      "@root/*": ["../*"]
     },
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "declaration": true,
-    "forceConsistentCasingInFileNames": true, 
-    "resolveJsonModule": true
+    "declarationMap": true,
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

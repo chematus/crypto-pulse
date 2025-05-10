@@ -2,8 +2,10 @@
 
 node_modules
 /data-fetcher/node_modules
+/websocket-service/node_modules
 /frontend/node_modules
 
 /data-fetcher/dist
+/websocket-service/dist
 
 logs
