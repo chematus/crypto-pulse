@@ -54,6 +54,25 @@ services:
       kafka:
         condition: service_healthy
 
+  websocket-service:
+    build:
+      context: .
+      dockerfile: ./websocket-service/Dockerfile
+    container_name: websocket-service
+    restart: on-failure
+    networks:
+      - crypto-pulse-net
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-crypto-updates}
+      LOG_DIR: ${LOG_DIR:-logs}
+      LOG_DEFAULT_LEVEL: ${LOG_DEFAULT_LEVEL:-info}
+      LOG_LEVEL_WEBSOCKET_SERVICE: ${LOG_LEVEL_WEBSOCKET_SERVICE}
+    depends_on:
+      kafka:
+        condition: service_healthy
+
 networks:
   crypto-pulse-net:
     driver: bridge

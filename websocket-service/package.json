@@ -2,7 +2,7 @@
   "name": "websocket-service",
   "version": "1.0.0",
   "description": "Subscribes to the `crypto-updates` Kafka topic and pushes new price data to connected frontend clients via WebSockets.",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "kafkajs": "^2.2.4",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.2"
   }
 }

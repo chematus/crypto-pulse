@@ -1,4 +1,5 @@
-import { Kafka, logLevel, CompressionTypes, KafkaJSError } from "kafkajs";
+import pkg from "kafkajs";
+const { Kafka, logLevel, CompressionTypes, KafkaJSError } = pkg;
 import { env } from 'node:process';
 import loggerUtil from '@root/logger.util.js';
 
