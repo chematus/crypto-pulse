@@ -60,10 +60,13 @@ services:
       dockerfile: ./websocket-service/Dockerfile
     container_name: websocket-service
     restart: on-failure
+    ports:
+      - "${WEBSOCKET_PORT:-8080}:${WEBSOCKET_PORT:-8080}"
     networks:
       - crypto-pulse-net
     environment:
       NODE_ENV: ${NODE_ENV:-development}
+      WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8080}
       KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
       KAFKA_TOPIC: ${KAFKA_TOPIC:-crypto-updates}
       LOG_DIR: ${LOG_DIR:-logs}
@@ -72,6 +75,16 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./frontend/Dockerfile
+  #   container_name: frontend
+  #   ports: 
+  #     - "${FRONTEND_PORT:-3000}:80"
+  #   networks: 
+  #     - crypto-pulse-net
 
 networks:
   crypto-pulse-net:

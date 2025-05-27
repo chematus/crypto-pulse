@@ -1,0 +1,27 @@
+.container {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0;
+
+  .price {
+    font-size: 3.1rem;
+    color: var(--color-text-primary);
+    font-family: monospace;
+  }
+
+  .currency {
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transform: rotate(270deg);
+    transform-origin: center;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    line-height: 1;
+    margin-top: 0.2rem;
+  }
+}

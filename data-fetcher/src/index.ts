@@ -87,7 +87,7 @@ type Message = {
 
 type PriceData = {
   [currency: string]: number;
-}
+};
 
 const createMessage = (key: string, value: number): Message => ({
   key: key,

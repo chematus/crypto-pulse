@@ -14,10 +14,13 @@ export default tseslint.config(
     ignores: [
         'node_modules/',
         '.env',
-        'eslint.config.js',
+        'eslint.config.mjs',
         '.prettierrc.js',
         'data-fetcher/dist/',
-        'logs',
+        'websocket-service/dist/',
+        'frontend/dist/',
+        'logs/',
+        '*.d.ts',
     ],
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],

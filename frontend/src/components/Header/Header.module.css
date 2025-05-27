@@ -1,0 +1,11 @@
+.container {
+  display: block;
+  height: 5rem;
+
+  .logo {
+    height: 3rem;
+    width: 3rem;
+    margin: 1rem;
+    filter: drop-shadow(0px 0px 3px var(--color-background-logo));
+  }
+}

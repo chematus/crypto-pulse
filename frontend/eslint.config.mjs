@@ -4,6 +4,8 @@ import hooksPlugin from 'eslint-plugin-react-hooks';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 
 export default tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
     plugins: {
@@ -12,8 +14,9 @@ export default tseslint.config(
       'jsx-a11y': jsxA11yPlugin,
     },
     ignores: [
-        'node_modules/',
-        'eslint.config.js'
+      '**/*.d.ts',
+      'dist/',
+      'build/',
     ],
     rules: {
       ...reactPlugin.configs.recommended.rules,
@@ -23,6 +26,7 @@ export default tseslint.config(
       'react/prop-types': 'off',
     },
     languageOptions: {
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,

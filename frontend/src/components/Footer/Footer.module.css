@@ -1,0 +1,9 @@
+.container {
+  display: block;
+  height: 2rem;
+  margin-top: 2rem;
+  width: 100%;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+}
