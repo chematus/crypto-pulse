@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch & node --watch dist/index.js"
+    "dev": "tsc --watch & node --watch dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "chematus",
@@ -20,6 +23,8 @@
   "devDependencies": {
     "@types/node": "^22.15.3",
     "tsc-alias": "^1.8.15",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   }
 }

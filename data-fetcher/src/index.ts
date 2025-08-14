@@ -1,4 +1,4 @@
-import pkg from "kafkajs";
+import pkg from 'kafkajs';
 const { Kafka, logLevel, CompressionTypes, KafkaJSError } = pkg;
 import { env } from 'node:process';
 import loggerUtil from '@root/logger.util.js';
@@ -47,7 +47,7 @@ const kafka = new Kafka({
 
 const producer = kafka.producer();
 
-const fetchData = async (): Promise<object | null> => {
+export const fetchData = async (): Promise<object | null> => {
   const params = new URLSearchParams({
     vs_currencies: DEFAULT_CURRENCY,
     ids: COIN_IDS,
@@ -100,7 +100,7 @@ const createMessage = (key: string, value: number): Message => ({
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const pushMessages = async (payload: object | null) => {
+export const pushMessages = async (payload: object | null) => {
   if (!payload) {
     logger.warn('No payload received, skipping message push.');
     return;
