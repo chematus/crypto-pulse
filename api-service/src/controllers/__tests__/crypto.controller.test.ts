@@ -11,6 +11,14 @@ import app from '../../index.js';
 import * as CryptoService from '../../services/crypto.service.js';
 
 vi.mock('../../services/crypto.service.js');
+vi.mock('@root/logger.util.js', () => ({
+  default: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 const mockedGetTrackedCoinList = CryptoService.getTrackedCoinList as Mock;
 const mockedGetCoinPriceHistoryById = CryptoService.getCoinPriceHistoryById as Mock;

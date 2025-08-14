@@ -28,9 +28,16 @@ vi.mock('kafkajs', () => {
     },
   };
 });
+vi.mock('@root/logger.util.js', () => ({
+  default: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 describe.only('Data Fetcher Logic', () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
   });

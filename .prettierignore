@@ -4,11 +4,19 @@ node_modules
 /data-fetcher/node_modules
 /websocket-service/node_modules
 /frontend/node_modules
+/api-service/node_modules
 
 /data-fetcher/dist
 /websocket-service/dist
 /api-service/dist
 
+/data-fetcher/logs
+/websocket-service/logs
+/api-service/logs
+
+/data-fetcher/coverage
+/websocket-service/coverage
+/frontend/coverage
 /api-service/coverage
 
 logs

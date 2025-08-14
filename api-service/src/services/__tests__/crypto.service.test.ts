@@ -15,6 +15,14 @@ import { closeRedisConnection } from '../../config/redis.js';
 
 vi.mock('../../config/db.js');
 vi.mock('../../config/redis.js');
+vi.mock('@root/logger.util.js', () => ({
+  default: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 const mockedDbQuery = db.query as Mock;
 const mockedRedisGet = redis.get as Mock;

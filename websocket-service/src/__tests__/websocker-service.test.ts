@@ -8,6 +8,15 @@ const { mockDbQuery, mockBroadcast, mockEachMessage } = vi.hoisted(() => {
   }
 });
 
+vi.mock('@root/logger.util.js', () => ({
+  default: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
+
 vi.mock('../config/db.js', () => ({
   default: {
     query: mockDbQuery,
