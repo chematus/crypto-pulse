@@ -37,7 +37,7 @@ vi.mock('@root/logger.util.js', () => ({
   }),
 }));
 
-describe.only('Data Fetcher Logic', () => {
+describe('Data Fetcher Logic', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
