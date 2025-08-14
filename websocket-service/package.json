@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch & node --watch dist/index.js"
+    "dev": "tsc --watch & node --watch dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "chematus",
@@ -14,11 +17,15 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^22.15.17",
+    "@types/pg": "^8.15.4",
     "@types/ws": "^8.18.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "kafkajs": "^2.2.4",
+    "pg": "^8.16.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",

@@ -4,22 +4,22 @@ import { fetchData, pushMessages } from '../index.js';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const mocks = vi.hoisted(() => {
+const { mockKafkaSend, mockKafkaConnect, mockKafkaDisconnect } = vi.hoisted(() => {
   return {
     mockKafkaSend: vi.fn(),
     mockKafkaConnect: vi.fn(),
     mockKafkaDisconnect: vi.fn(),
   }
-})
+});
 
 vi.mock('kafkajs', () => {
   return {
     default: {
       Kafka: vi.fn(() => ({
         producer: vi.fn(() => ({
-          connect: mocks.mockKafkaConnect,
-          send: mocks.mockKafkaSend,
-          disconnect: mocks.mockKafkaDisconnect,
+          connect: mockKafkaConnect,
+          send: mockKafkaSend,
+          disconnect: mockKafkaDisconnect,
         })),
       })),
       logLevel: {},
@@ -29,7 +29,7 @@ vi.mock('kafkajs', () => {
   };
 });
 
-describe('Data Fetcher Logic', () => {
+describe.only('Data Fetcher Logic', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,8 +85,8 @@ describe('Data Fetcher Logic', () => {
       await pushMessages(payload);
 
       // Assert
-      expect(mocks.mockKafkaSend).toHaveBeenCalledTimes(1);
-      expect(mocks.mockKafkaSend).toHaveBeenCalledWith({
+      expect(mockKafkaSend).toHaveBeenCalledTimes(1);
+      expect(mockKafkaSend).toHaveBeenCalledWith({
         topic: 'crypto-updates',
         compression: 2, // CompressionTypes.GZIP
         messages: [
@@ -108,7 +108,7 @@ describe('Data Fetcher Logic', () => {
       await pushMessages({});
 
       // Assert
-      expect(mocks.mockKafkaSend).not.toHaveBeenCalled();
+      expect(mockKafkaSend).not.toHaveBeenCalled();
     });
 
     it('should filter out entries that do not have a valid price', async () => {
@@ -122,8 +122,8 @@ describe('Data Fetcher Logic', () => {
         await pushMessages(payload);
   
         // Assert
-        expect(mocks.mockKafkaSend).toHaveBeenCalledTimes(1);
-        const sentMessages = mocks.mockKafkaSend.mock.calls[0][0].messages;
+        expect(mockKafkaSend).toHaveBeenCalledTimes(1);
+        const sentMessages = mockKafkaSend.mock.calls[0][0].messages;
         expect(sentMessages).toHaveLength(1);
         expect(sentMessages[0].key).toBe('bitcoin');
       });

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as CryptoService from '../services/crypto.service.js';
+import { getTrackedCoinList, getCoinPriceHistoryById } from '../services/crypto.service.js';
 import loggerUtil from '@root/logger.util.js';
 
 const logger = loggerUtil('crypto-controller');
@@ -14,7 +14,7 @@ const logger = loggerUtil('crypto-controller');
 export const getTrackedCoins = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     logger.info('Request received for getTrackedCoins');
-    const trackedCoins = await CryptoService.getTrackedCoinList();
+    const trackedCoins = await getTrackedCoinList();
 
     res.status(200).json({
       trackedCoins,
@@ -56,7 +56,7 @@ export const getCoinHistory = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    const priceHistory = await CryptoService.getCoinPriceHistoryById(coinId, serviceLimit);
+    const priceHistory = await getCoinPriceHistoryById(coinId, serviceLimit);
 
     if (priceHistory === null) {
       res.status(404).json({

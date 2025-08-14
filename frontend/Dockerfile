@@ -16,6 +16,8 @@ RUN rm /etc/nginx/conf.d/default.conf
 
 COPY ./frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
+COPY ./frontend/public /usr/share/nginx/html
+
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 
 EXPOSE 80

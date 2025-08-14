@@ -1,21 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
-const dotenv = require('dotenv');
+const dotenv = require('dotenv-webpack');
 
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === 'development';
-
-  const localEnv = dotenv.config({ path: path.resolve(__dirname, '.env') }).parsed || {};
-
-  const envKeys = Object.keys(localEnv).reduce((prev, next) => {
-    prev[`process.env.${next}`] = JSON.stringify(localEnv[next]);
-    return prev;
-  }, {});
-
-  if (!envKeys['process.env.REACT_APP_WEBSOCKET_URL']) {
-    envKeys['process.env.REACT_APP_WEBSOCKET_URL'] = JSON.stringify('ws://localhost:8080');
-  }
 
   return {
     mode: isDevelopment ? 'development' : 'production',
@@ -81,7 +69,7 @@ module.exports = (env, argv) => {
         template: './public/index.html',
         favicon: './public/favicon.ico',
       }),
-      new webpack.DefinePlugin(envKeys),
+      new dotenv(),
     ],
     devtool: isDevelopment ? 'eval-source-map' : 'source-map',
     devServer: {

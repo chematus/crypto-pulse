@@ -3,7 +3,7 @@ import PriceBlock from './PriceBlock/PriceBlock';
 import PlotBlock from './PlotBlock/PlotBlock';
 import { PriceHistoryPoint } from 'App';
 
-type CoinData = {
+export type CoinData = {
   coinId: string;
   currency: string;
   priceHistory: Array<PriceHistoryPoint>;

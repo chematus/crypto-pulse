@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import CoinBlock from '@components/CoinBlock/CoinBlock';
 import Header from '@components/Header/Header';
 import Footer from '@components/Footer/Footer';
 import styles from './App.module.css';
+import { getInitialCoinData } from '@services/api';
 
-type CoinObject = {
+export type CoinObject = {
   coinId: string;
   price: number;
   currency: string;
@@ -26,110 +27,137 @@ export interface AllCoinsState {
 }
 
 const WEBSOCKET_URL = process.env.REACT_APP_WEBSOCKET_URL;
+const MAX_HISTORY_LENGTH = 100;
 
 function App() {
   const [allCoinsData, setAllCoinsData] = useState<AllCoinsState>({});
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const reconnectTimerId = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-     if (!WEBSOCKET_URL) {
+    const fetchInitialData = async () => {
+      console.log("Fetching initial historical data...");
+      setIsLoading(true);
+      try {
+        const initialData = await getInitialCoinData();
+        setAllCoinsData(initialData);
+        console.log("Initial data loaded successfully.");
+      } catch (error) {
+        console.error("Failed to fetch initial coin data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (!WEBSOCKET_URL) {
+      console.error("WebSocket URL is not configured!");
       return;
     }
 
-    console.log('Attempting to connect to WebSocket at:', WEBSOCKET_URL);
-    
-    const ws = new WebSocket(WEBSOCKET_URL);
+    let wsInstance: WebSocket;
+    let reconnectAttempts = 0;
 
-    const handleOpen = () => {
-      console.log('Connected to WebSocket server');
-      setIsConnected(true);
-    };
+    const connect = () => {
+      wsInstance = new WebSocket(WEBSOCKET_URL);
 
-    const handleMessage = (event: MessageEvent) => {
-      let parsedMessage: CoinObject | null = null;
+      wsInstance.addEventListener('open', () => {
+        console.log('WebSocket: Connected to server');
+        setIsConnected(true);
+        reconnectAttempts = 0;
+        if (reconnectTimerId.current) {
+          clearTimeout(reconnectTimerId.current);
+        }
+      });
 
-      try {
-        if (typeof event.data === 'string') {
-          parsedMessage = JSON.parse(event.data);
-        } else {
-          console.warn('Received non-string WebSocket message:', event.data);
+      wsInstance.addEventListener('message', (event: MessageEvent) => {
+        let parsedMessage: CoinObject | null = null;
+        try {
+          if (typeof event.data === 'string') parsedMessage = JSON.parse(event.data);
+        } catch (error) {
+          console.error(`WebSocket: Error parsing payload: "${event.data}".`, error);
           return;
         }
-      } catch (error) {
-        console.error(`Error parsing WebSocket payload: "${event.data}". Skipping.`, error);
-        return;
-      }
 
-      if (parsedMessage && parsedMessage.coinId) {
-        const { coinId, price, currency, timestamp } = parsedMessage;
+        if (parsedMessage && parsedMessage.coinId) {
+          const { coinId, price, currency, timestamp } = parsedMessage;
+          setAllCoinsData((prevAllCoinsData) => {
+            const existingHistory = prevAllCoinsData[coinId]?.priceHistory || [];
+            const newHistoryPoint = { price, time: new Date(timestamp) };
 
-        setAllCoinsData((prevAllCoinsData) => {
-          const existingCoinData = prevAllCoinsData[coinId];
-          const existingHistory = existingCoinData?.priceHistory || [];
-          const newHistoryPoint = { price, time: new Date(timestamp) };
+            const updatedHistory = [...existingHistory, newHistoryPoint].slice(-MAX_HISTORY_LENGTH);
 
-          const MAX_HISTORY_LENGTH = 100;
-          const updatedHistory = [...existingHistory, newHistoryPoint].slice(-MAX_HISTORY_LENGTH);
+            return {
+              ...prevAllCoinsData,
+              [coinId]: { priceHistory: updatedHistory, currency },
+            };
+          });
+        }
+      });
 
-          return {
-            ...prevAllCoinsData,
-            [coinId]: {
-              priceHistory: updatedHistory,
-              currency,
-            },
-          };
-        });
-      } else {
-        console.warn('Received WebSocket message without coinId or invalid format:', parsedMessage);
-      }
+      wsInstance.addEventListener('error', (errorEvent: Event) => {
+        console.error('WebSocket: Error occurred:', errorEvent);
+      });
+
+      wsInstance.addEventListener('close', (event: CloseEvent) => {
+        console.log(`WebSocket: Disconnected - Code ${event.code}`);
+        setIsConnected(false);
+
+        const maxReconnectAttempts = 5;
+        if (reconnectAttempts < maxReconnectAttempts) {
+          const delay = Math.pow(2, reconnectAttempts) * 1000;
+          reconnectAttempts++;
+          console.log(`Attempting to reconnect in ${delay / 1000}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
+          reconnectTimerId.current = setTimeout(connect, delay);
+        } else {
+          console.error('WebSocket: Max reconnection attempts reached.');
+        }
+      });
     };
 
-    const handleError = (error: Event) => {
-      console.error('WebSocket error occurred:', error);
-      setIsConnected(false);
-    };
-
-    const handleClose = (event: CloseEvent) => {
-      console.log(`WebSocket disconnected: Code ${event.code}, Reason: ${event.reason}`);
-      setIsConnected(false);
-    };
-
-    ws.addEventListener('open', handleOpen);
-    ws.addEventListener('message', handleMessage);
-    ws.addEventListener('error', handleError);
-    ws.addEventListener('close', handleClose);
+    connect();
 
     return () => {
-      console.log('Cleaning up WebSocket event listeners.');
-      ws.removeEventListener('open', handleOpen);
-      ws.removeEventListener('message', handleMessage);
-      ws.removeEventListener('error', handleError);
-      ws.removeEventListener('close', handleClose);
-      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-        ws.close();
-        console.log('WebSocket connection closed.');
+      console.log('Cleaning up WebSocket connection and timers.');
+
+      if (reconnectTimerId.current) {
+        clearTimeout(reconnectTimerId.current);
+      }
+
+      if (wsInstance) {
+          wsInstance.close();
       }
     };
-  }, []);
+  }, [WEBSOCKET_URL]);
 
-  return (
-    <>
-      <Header />
-      <div className={styles.main}>
-        {Object.keys(allCoinsData).length === 0 && !isConnected && (
-          <p>Attempting to connect to WebSocket server...</p>
-        )}
-        {Object.keys(allCoinsData).length === 0 && isConnected && (
-          <p>Connected. Waiting for cryptocurrency data...</p>
-        )}
-        {Object.entries(allCoinsData).map(([coinId, data]) => (
-          <CoinBlock
+  const renderContent = () => {
+    if (isLoading) {
+      return <p>Loading initial data...</p>;
+    }
+
+    if (Object.keys(allCoinsData).length === 0) {
+        return <p>No cryptocurrency data to display. Please check the configuration.</p>
+    }
+
+    return Object.entries(allCoinsData).map(([coinId, data]) => (
+        <CoinBlock
             key={coinId}
             coinId={coinId}
             priceHistory={data.priceHistory}
             currency={data.currency}
-          />
-        ))}
+        />
+    ));
+  }
+
+  return (
+    <>
+      <Header isConnected={isConnected} />
+      <div className={styles.main}>
+        {renderContent()}
       </div>
       <Footer />
     </>

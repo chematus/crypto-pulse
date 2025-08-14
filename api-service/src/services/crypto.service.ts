@@ -9,13 +9,13 @@ const DEFAULT_TRACKED_COIN_IDS_STRING = 'bitcoin,ethereum';
 const DEFAULT_PRICE_HISTORY_LIMIT = 100;
 const CACHE_EXPIRATION_SECONDS = 60;
 
-interface PriceDataPoint {
+export interface PriceDataPoint {
   price: number;
   currency: string;
   timestamp: Date;
 }
 
-interface TrackedCoin {
+export interface TrackedCoin {
   id: string;
 }
 
@@ -28,7 +28,8 @@ interface TrackedCoin {
 export const getTrackedCoinList = async (): Promise<TrackedCoin[]> => {
   logger.info('Service: Fetching list of tracked coins...');
   
-  const trackedCoinIdsString = env.TRACKED_COIN_IDS || DEFAULT_TRACKED_COIN_IDS_STRING;
+  const trackedCoinIdsString = env.TRACKED_COIN_IDS && env.TRACKED_COIN_IDS !== 'undefined'
+    ? env.TRACKED_COIN_IDS : DEFAULT_TRACKED_COIN_IDS_STRING;
   const coinIds = trackedCoinIdsString
     .split(',')
     .map(id => id.trim())
@@ -39,6 +40,7 @@ export const getTrackedCoinList = async (): Promise<TrackedCoin[]> => {
   }
 
   const trackedCoins: TrackedCoin[] = coinIds.map(id => ({ id }));
+
   return trackedCoins;
 };
 
@@ -80,8 +82,14 @@ export const getCoinPriceHistoryById = async (
     `;
     const result = await query(sqlQuery, [coinId, limit]);
 
-    if (result.rowCount === 0) {
+    console.log('----------------------->>>>>>>>>>>>>>>>>');
+    console.log(result);
+    console.log('----------------------->>>>>>>>>>>>>>>>>');
+
+
+    if (!result || result.rowCount === 0) {
       logger.info(`Service: No price history found in DB for coinId: ${coinId}`);
+
       return [];
     }
 
@@ -96,10 +104,12 @@ export const getCoinPriceHistoryById = async (
       logger.info(`Set cache for key: ${cacheKey} with ${CACHE_EXPIRATION_SECONDS}s expiration.`);
     }
 
-    return historyFromDb.reverse();
+    console.log(historyFromDb);
 
+    return historyFromDb.reverse();
   } catch (error) {
     logger.error(`Service: Error fetching price history for coinId "${coinId}":`, error);
+
     throw error;
   }
 };
