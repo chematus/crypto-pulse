@@ -35,7 +35,7 @@ The application uses a microservices architecture orchestrated by Docker Compose
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/chematus/crypto-pulse.git](https://github.com/chematus/crypto-pulse.git)
+    git clone https://github.com/chematus/crypto-pulse.git
     cd crypto-pulse
     ```
 
