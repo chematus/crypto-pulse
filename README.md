@@ -70,7 +70,21 @@ To run the tests manually for a specific service, navigate to its directory and 
 ```bash
 cd api-service
 npm test
-Example: Running tests for the frontendcd frontend
+```
+**Example: Running tests for the frontend**
+```bash
+cd frontend
 npm test
-Shutting DownTo stop all running services:docker-compose down
-To stop services and remove the database volume for a completely fresh start:docker-compose down -v
+```
+## Shutting Down
+
+To stop all running services:
+```bash
+docker-compose down
+```
+
+To stop services and remove the database volume for a completely fresh start:
+
+```bash
+docker-compose down -v
+```
