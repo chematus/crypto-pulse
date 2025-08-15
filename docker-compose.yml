@@ -69,11 +69,18 @@ services:
       WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8080}
       KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
       KAFKA_TOPIC: ${KAFKA_TOPIC:-crypto-updates}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
       LOG_DIR: ${LOG_DIR:-logs}
       LOG_DEFAULT_LEVEL: ${LOG_DEFAULT_LEVEL:-info}
       LOG_LEVEL_WEBSOCKET_SERVICE: ${LOG_LEVEL_WEBSOCKET_SERVICE}
     depends_on:
       kafka:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
 
   api-service:
@@ -146,6 +153,9 @@ services:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
+      args:
+        REACT_APP_WEBSOCKET_URL: ${REACT_APP_WEBSOCKET_URL:-ws://localhost:8080}
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5001/api/v1}
     container_name: frontend
     ports:
       - "${FRONTEND_PORT:-3000}:80"
