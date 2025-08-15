@@ -14,7 +14,7 @@ const KAFKA_SEND_RETRY_DELAY_MS = parseInt(env.KAFKA_SEND_RETRY_DELAY_MS || '100
 const API_HOST = env.API_HOST || 'https://api.coingecko.com';
 const API_PATH = env.API_PATH || '/api/v3';
 const API_ENDPOINT = '/simple/price';
-const API_KEY = env.API_KEY || '';
+const COINGECKO_API_KEY = env.COINGECKO_API_KEY || '';
 const API_AUTH_HEADER = 'x-cg-demo-api-key';
 
 const DEFAULT_CURRENCY = env.DEFAULT_CURRENCY || 'usd';
@@ -59,7 +59,7 @@ export const fetchData = async (): Promise<object | null> => {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        ...(API_KEY && { [API_AUTH_HEADER]: API_KEY }),
+        ...(COINGECKO_API_KEY && { [API_AUTH_HEADER]: COINGECKO_API_KEY }),
         'Accept': 'application/json',
       },
     });
